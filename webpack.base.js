@@ -3,7 +3,7 @@ var webpack = require('webpack');
 var ExtractTextWebpackPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 let cssExtract = new ExtractTextWebpackPlugin({
     filename: 'css.css',
@@ -13,10 +13,7 @@ let sassExtract = new ExtractTextWebpackPlugin('sass.css')
 let lessExtract = new ExtractTextWebpackPlugin('less.css')
 
 module.exports = {
-    entry: [
-        'react-hot-loader/patch', // 激活HMR
-        './src/index.js'
-    ],
+    entry:'./src/index.js',
     output: {
         path: path.resolve(__dirname, './dist'),
         filename: 'bundle.[hash:8].js',
@@ -75,7 +72,6 @@ module.exports = {
         rules:[
             {
                 test: /\.js$/,
-                exclude: /node_modules/,
                 use: {
                     loader:'babel-loader',
                     options: {
@@ -97,7 +93,6 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
-                include: __dirname + /src/,
                 use: sassExtract.extract({
                     fallback: "style-loader",
                     use: ["css-loader?minimize","sass-loader"],
@@ -146,6 +141,13 @@ module.exports = {
             filename: `index.html`,
             hash: true
         }),
+        new webpack.DllReferencePlugin({
+            manifest: path.join(__dirname, 'vendor', 'react.manifest.json')
+        }),
+        new CopyWebpackPlugin([{
+            from: path.join(__dirname,'vendor'),//静态资源目录源地址
+            to:'./vendor' //目标地址，相对于output的path目录
+        }]),
 /*        new webpack.optimize.CommonsChunkPlugin({
             name: 'common' // 指定公共 bundle 的名称。
     +     })*/
